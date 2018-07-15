@@ -1,5 +1,6 @@
 require('./../configs/config');
 var router=require('express').Router();
+var mongoose=require('./../db/mongoose');
 var jwt=require('jsonwebtoken');
 var passport = require('passport');
 var responseGenerator=require('./../utils/responsegenerator');
@@ -20,35 +21,21 @@ router.get('/signin/facebook',
 //api for facebook signin callback
 router.get('/signin/facebook/callback',
         passport.authenticate('facebook', { 
-            successRedirect: '/me',
-            failureRedirect: '/eror' 
+            failureRedirect: '/' 
         })
-        // ,function (req, res) {
-        //     // res.render('profile.ejs', { user: "Anuradha" });
-        //     // res.redirect("/#/signin");
-        // }
+        ,function (req, res) {
+            res.redirect("/#/signin");
+        }
 );
-
-router.get('/error',function(req,res){
-    // myResponse=responseGenerator.generate(false,"User:",200,req.user);
-    // res.send(myResponse);
-    res.render('error.ejs');
-});
-
-router.get('/me',isLoggedIn,function(req,res){
-    // myResponse=responseGenerator.generate(false,"User:",200,req.user);
-    // res.send(myResponse);
-    res.render('profile.ejs', {user:req.user});
-});
 
 //api to get all user details when signed-in through google or facebook
 router.get('/userDetails', function (req, res) {
     if (req.user) {
         var payload = req.user.social.toObject();
-        // var result = payload.toObject();
+        var result = payload.toObject();
         var access='auth';
         var token=jwt.sign({payload,access},process.env.JWT_SECRET,{expiresIn:30*60});
-        var email=req.user.social;
+        var email=req.user.social.email;
         myResponse = responseGenerator.generate(false, "Token Issued", 200, {user:email,token:token});
         res.send(myResponse);
     }
@@ -60,12 +47,5 @@ router.get('/logout', function(req, res){
     myResponse=responseGenerator.generate(false,"User Logout successful",200,null);
     res.send(myResponse);
 });
-
-function isLoggedIn(req, res, next) {
-    if(req.isAuthenticated()){
-        return next();
-    }
-
-}
 
 module.exports = router;

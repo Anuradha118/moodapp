@@ -7,7 +7,7 @@ var path = require('path');
 var session = require('express-session');
 var cors = require('cors');
 var passport = require('passport'); 
-const port=process.env.PORT||3000;
+const port=process.env.PORT;
 // Init App
 var app = express();
 app.use(cors());
